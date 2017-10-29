@@ -4,9 +4,10 @@
 #define protected public
 #define private public
 //yes
-#include "../link_list.h"
+#include "../link_list_v2.h"
+
 #include <utility>
-using namespace eLib;
+using namespace expr;
 
 TEST(link_list_test,ctor_basic){
     //testing default ctor
@@ -113,15 +114,15 @@ TEST(link_list_test, iter_end_and_begin){
     link_list<int> f;
     //checking end empty iterator
     auto it = f.end();
-    ASSERT_EQ(nullptr,it._ptr);
-    ASSERT_TRUE(it.isEnd);
+    ASSERT_EQ(nullptr,it.ptr_);
+    ASSERT_TRUE(it.end_);
     ASSERT_DEBUG_DEATH(*it,"");
 
     it = f.begin();
 
     //checking begin empty iterator
-    ASSERT_TRUE(it.isEnd);
-    ASSERT_EQ(nullptr, it._ptr);
+    ASSERT_TRUE(it.end_);
+    ASSERT_EQ(nullptr, it.ptr_);
     ASSERT_DEBUG_DEATH(*it,"");
 
     //filling the list
@@ -132,12 +133,12 @@ TEST(link_list_test, iter_end_and_begin){
     //checking begin iterator of filled list
     it = f.begin();
     ASSERT_EQ(0,*it);
-    ASSERT_FALSE(it.isEnd);
+    ASSERT_FALSE(it.end_);
 
     //checking end iterator of empty list
     it = f.end();
-    ASSERT_TRUE(it._ptr->_data == 19);
-    ASSERT_TRUE(it.isEnd);
+    ASSERT_TRUE(it.ptr_->data_ == 19);
+    ASSERT_TRUE(it.end_);
     auto it1 = f.begin();
 
     //moving an begin iterator to the end and then checking if they are equal
