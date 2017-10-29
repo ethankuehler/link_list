@@ -1,8 +1,9 @@
-//
-// Created by ekuehler on 10/27/17.
-//
+/*
+ * link_list.h version 2.0
+ */
 
 #ifndef C17TESTING_LINK_LIST_V2_H
+#define C17TESTING_LINK_LIST_V2_H
 #include <memory>
 #include <cassert>
 
@@ -52,12 +53,15 @@ protected:
         }
     };
 
-    struct base_foward_iterator : base_iterator {
-        using base_iterator::base_iterator;
+    struct base_forward_iterator : base_iterator {
         using base_iterator::ptr_;
         using base_iterator::end_;
 
-        base_foward_iterator& operator++() {
+        base_forward_iterator() : base_iterator() {};
+        base_forward_iterator(node_* ptr, bool end = false) : base_iterator(ptr,end) {}
+
+
+        base_forward_iterator& operator++() {
             if (ptr_->next_ == nullptr) {
                 end_ = true;
             } else {
@@ -66,50 +70,50 @@ protected:
             return *this;
         }
 
-        base_foward_iterator operator++(int) {
-            const base_foward_iterator it(*this);
+        base_forward_iterator operator++(int) {
+            const base_forward_iterator it(*this);
             ++(*this);
             return it;
         }
 
-        base_foward_iterator& operator--() {
+        base_forward_iterator& operator--() {
             assert(ptr_->back_ != nullptr);
             ptr_ = ptr_->back_;
             end_ = false;
             return *this;
         }
 
-        base_foward_iterator operator--(int) {
-            const base_foward_iterator it(*this);
+        base_forward_iterator operator--(int) {
+            const base_forward_iterator it(*this);
             --(*this);
             return it;
         }
 
-        base_foward_iterator operator+(const int step) const {
-            base_foward_iterator it(*this);
+        base_forward_iterator operator+(const int step) const {
+            base_forward_iterator it(*this);
             for (int i = 0; i < step; ++i) {
                 ++it;
             }
             return it;
         }
 
-        friend base_foward_iterator operator+(const int step, const base_foward_iterator& it) {
+        friend base_forward_iterator operator+(const int step, const base_forward_iterator& it) {
             return it + step;
         }
 
-        base_foward_iterator operator-(const int step) const {
-            base_foward_iterator it(*this);
+        base_forward_iterator operator-(const int step) const {
+            base_forward_iterator it(*this);
             for (int i = 0; i < step; ++i) {
                 --it;
             }
             return it;
         }
 
-        friend base_foward_iterator operator-(const int step, const base_foward_iterator& it) {
+        friend base_forward_iterator operator-(const int step, const base_forward_iterator& it) {
             return it - step;
         }
 
-        size_t operator-(const base_foward_iterator& other) const {
+        size_t operator-(const base_forward_iterator& other) const {
             assert(ptr_ <= other.ptr_);
             auto it = other;
             size_t n = 0;
@@ -123,9 +127,11 @@ protected:
     };
 
     struct base_reverse_iterator : base_iterator {
-        using base_iterator::base_iterator;
         using base_iterator::ptr_;
         using base_iterator::end_;
+
+        base_reverse_iterator() : base_iterator() {};
+        base_reverse_iterator(node_* ptr, bool end = false) : base_iterator(ptr,end) {}
 
         //really the --
         base_reverse_iterator& operator++() {
@@ -194,16 +200,16 @@ protected:
     };
 
 public:
-    class iterator final  : public base_foward_iterator {
+    class iterator final  : public base_forward_iterator {
     protected:
-        using base_foward_iterator::ptr_;
-        using base_foward_iterator::end_;
+        using base_forward_iterator::ptr_;
+        using base_forward_iterator::end_;
     public:
-        iterator() : base_foward_iterator() {}
+        iterator() : base_forward_iterator() {}
 
-        iterator(node_* ptr, bool end) : base_foward_iterator(ptr,end) {}
+        iterator(node_* ptr, bool end) : base_forward_iterator(ptr,end) {}
 
-        iterator(const base_foward_iterator& other) {
+        iterator(const base_forward_iterator& other) {
             ptr_ = other.ptr_;
             end_ = other.end_;
         }
@@ -219,17 +225,17 @@ public:
         }
     };
 
-    class const_iterator final : public base_foward_iterator {
+    class const_iterator final : public base_forward_iterator {
     protected:
-        using base_foward_iterator::ptr_;
-        using base_foward_iterator::end_;
+        using base_forward_iterator::ptr_;
+        using base_forward_iterator::end_;
     public:
 
-        const_iterator() : base_foward_iterator() {}
+        const_iterator() : base_forward_iterator() {}
 
-        const_iterator(node_* ptr, const bool end = false) : base_foward_iterator(ptr,end) {}
+        const_iterator(node_* ptr, const bool end = false) : base_forward_iterator(ptr,end) {}
 
-        const_iterator(const base_foward_iterator& other) {
+        const_iterator(const base_forward_iterator& other) {
             ptr_ = other.ptr_;
             end_ = other.end_;
         }
@@ -300,7 +306,6 @@ public:
     };
 
 protected:
-
     iterator atIndex(const size_t index) {
         assert(index < length_);
         auto it = begin();
@@ -309,7 +314,7 @@ protected:
 
     unique_ptr<node_> head_;
     node_* tail_;
-    size_t length_;//todo fix length
+    size_t length_;
 public:
 
     link_list() {
@@ -517,7 +522,7 @@ public:
         auto it = atIndex(index);
         --it;
         tail_ = static_cast<base_iterator>(it).ptr_;
-        static_cast<base_iterator>(it).ptr_->next_.release();
+        static_cast<base_iterator>(it).ptr_->next_.reset();
         length_ = index;
     }
 
@@ -566,6 +571,6 @@ public:
     }
 };
 }
-#define C17TESTING_LINK_LIST_V2_H
+
 
 #endif //C17TESTING_LINK_LIST_V2_H
