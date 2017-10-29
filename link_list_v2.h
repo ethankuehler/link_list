@@ -431,6 +431,20 @@ public:
         return (*head_).data_;
     }
 
+    void insert(const T& data, base_iterator it){
+        if (index == begin()) {
+            push_front(std::move(data));
+        } else if (index == end()) {
+            push_back(std::move(data));
+        } else {
+            it.ptr_ = it.ptr_->back_;
+            auto temp = static_cast<base_iterator>(it).ptr_->next_.release();
+            static_cast<base_iterator>(it).ptr_->next_ =
+                    make_unique<node_>(temp, static_cast<base_iterator>(it).ptr_, std::move(data));
+            ++length_;
+        }
+    }
+
     void insert(const T& data, const size_t index) {
         if (index == 0) {
             push_front(std::move(data));
