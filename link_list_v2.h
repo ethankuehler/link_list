@@ -20,15 +20,15 @@ protected:
 
     struct node_ {
         unique_ptr<node_> next_;
-        node_ *back_;
+        node_* back_;
         T data_;
 
-        node_(node_ *next, node_ *back, T data)
+        node_(node_* next, node_* back, T data)
                 : next_(next), back_(back), data_(data) {}
     };
 
     struct base_iterator {
-        node_ *ptr_;
+        node_* ptr_;
         bool end_;
 
         base_iterator() {
@@ -36,7 +36,7 @@ protected:
             end_ = true;
         }
 
-        base_iterator(node_ *ptr, const bool end = false) {
+        base_iterator(node_* ptr, const bool end = false) {
             ptr_ = ptr;
             if (ptr_ == nullptr) {
                 end_ = true;
@@ -45,11 +45,11 @@ protected:
             }
         }
 
-        bool operator==(const base_iterator &other) const {
+        bool operator==(const base_iterator& other) const {
             return (ptr_ == other.ptr_) && (end_ == other.end_);
         }
 
-        bool operator!=(const base_iterator &other) const {
+        bool operator!=(const base_iterator& other) const {
             return !(*this == other);
         }
     };
@@ -60,10 +60,10 @@ protected:
 
         base_forward_iterator() : base_iterator() {};
 
-        base_forward_iterator(node_ *ptr, bool end = false) : base_iterator(ptr, end) {}
+        base_forward_iterator(node_* ptr, bool end = false) : base_iterator(ptr, end) {}
 
 
-        base_forward_iterator &operator++() {
+        base_forward_iterator& operator++() {
             if (ptr_->next_ == nullptr) {
                 end_ = true;
             } else {
@@ -78,7 +78,7 @@ protected:
             return it;
         }
 
-        base_forward_iterator &operator--() {
+        base_forward_iterator& operator--() {
             assert(ptr_->back_ != nullptr);
             ptr_ = ptr_->back_;
             end_ = false;
@@ -99,7 +99,7 @@ protected:
             return it;
         }
 
-        friend base_forward_iterator operator+(const int step, const base_forward_iterator &it) {
+        friend base_forward_iterator operator+(const int step, const base_forward_iterator& it) {
             return it + step;
         }
 
@@ -111,11 +111,11 @@ protected:
             return it;
         }
 
-        friend base_forward_iterator operator-(const int step, const base_forward_iterator &it) {
+        friend base_forward_iterator operator-(const int step, const base_forward_iterator& it) {
             return it - step;
         }
 
-        size_t operator-(const base_forward_iterator &other) const {
+        size_t operator-(const base_forward_iterator& other) const {
             assert(ptr_ <= other.ptr_);
             auto it = other;
             size_t n = 0;
@@ -134,10 +134,10 @@ protected:
 
         base_reverse_iterator() : base_iterator() {};
 
-        base_reverse_iterator(node_ *ptr, bool end = false) : base_iterator(ptr, end) {}
+        base_reverse_iterator(node_* ptr, bool end = false) : base_iterator(ptr, end) {}
 
         //really the --
-        base_reverse_iterator &operator++() {
+        base_reverse_iterator& operator++() {
             if (ptr_->back_ == nullptr) {
                 end_ = true;
             } else {
@@ -152,7 +152,7 @@ protected:
             return it;
         }
 
-        base_reverse_iterator &operator--() {
+        base_reverse_iterator& operator--() {
             assert(ptr_->next_ != nullptr);
             ptr_ = ptr_->next_.get();
             end_ = false;
@@ -173,7 +173,7 @@ protected:
             return it;
         }
 
-        friend base_reverse_iterator operator+(const int step, const base_reverse_iterator &it) {
+        friend base_reverse_iterator operator+(const int step, const base_reverse_iterator& it) {
             return it + step;
         }
 
@@ -185,11 +185,11 @@ protected:
             return it;
         }
 
-        friend base_reverse_iterator operator-(const int step, const base_reverse_iterator &it) {
+        friend base_reverse_iterator operator-(const int step, const base_reverse_iterator& it) {
             return it - step;
         }
 
-        size_t operator-(const base_reverse_iterator &other) const {
+        size_t operator-(const base_reverse_iterator& other) const {
             assert(ptr_ <= other.ptr_);
             auto it = other;
             size_t n = 0;
@@ -210,19 +210,19 @@ public:
     public:
         iterator() : base_forward_iterator() {}
 
-        iterator(node_ *ptr, bool end) : base_forward_iterator(ptr, end) {}
+        iterator(node_* ptr, bool end) : base_forward_iterator(ptr, end) {}
 
-        iterator(const base_forward_iterator &other) {
+        iterator(const base_forward_iterator& other) {
             ptr_ = other.ptr_;
             end_ = other.end_;
         }
 
-        T &operator*() {
+        T& operator*() {
             assert(ptr_ != nullptr);
             return ptr_->data_;
         }
 
-        T *operator->() {
+        T* operator->() {
             assert(ptr_ != nullptr);
             return &(ptr_->data_);
         }
@@ -236,19 +236,19 @@ public:
 
         const_iterator() : base_forward_iterator() {}
 
-        const_iterator(node_ *ptr, const bool end = false) : base_forward_iterator(ptr, end) {}
+        const_iterator(node_* ptr, const bool end = false) : base_forward_iterator(ptr, end) {}
 
-        const_iterator(const base_forward_iterator &other) {
+        const_iterator(const base_forward_iterator& other) {
             ptr_ = other.ptr_;
             end_ = other.end_;
         }
 
-        const T &operator*() const {
+        const T& operator*() const {
             assert(ptr_ != nullptr);
             return ptr_->data_;
         }
 
-        const T *operator->() const {
+        const T* operator->() const {
             assert(ptr_ != nullptr);
             return &(ptr_->data_);
         }
@@ -264,19 +264,19 @@ public:
             end_ = false;
         }
 
-        reverse_iterator(node_ *ptr, const bool end = false) : base_reverse_iterator(ptr, end) {}
+        reverse_iterator(node_* ptr, const bool end = false) : base_reverse_iterator(ptr, end) {}
 
-        reverse_iterator(const base_reverse_iterator &other) {
+        reverse_iterator(const base_reverse_iterator& other) {
             ptr_ = other.ptr_;
             end_ = other.end_;
         }
 
-        T &operator*() {
+        T& operator*() {
             assert(ptr_ != nullptr);
             return ptr_->data_;
         }
 
-        T *operator->() {
+        T* operator->() {
             assert(ptr_ != nullptr);
             return &(ptr_->data_);
         }
@@ -290,9 +290,9 @@ public:
 
         const_reverse_iterator() : base_reverse_iterator() {}
 
-        const_reverse_iterator(node_ *ptr, const bool end = false) : base_reverse_iterator(ptr, end) {}
+        const_reverse_iterator(node_* ptr, const bool end = false) : base_reverse_iterator(ptr, end) {}
 
-        const_reverse_iterator(const base_reverse_iterator &other) {
+        const_reverse_iterator(const base_reverse_iterator& other) {
             ptr_ = other.ptr_;
             end_ = other.end_;
         }
@@ -302,7 +302,7 @@ public:
             return *ptr_;
         }
 
-        const T *operator->() const {
+        const T* operator->() const {
             assert(ptr_ != nullptr);
             return &(ptr_->data_);
         }
@@ -317,7 +317,7 @@ protected:
     }
 
     unique_ptr<node_> head_;
-    node_ *tail_;
+    node_* tail_;
     size_t length_;
 public:
 
@@ -326,32 +326,32 @@ public:
         length_ = 0;
     }
 
-    link_list(const link_list &other) {
+    link_list(const link_list& other) {
         tail_ = nullptr;
         length_ = 0;
         head_ = nullptr;
-        for (const auto &i : other) {
+        for (const auto& i : other) {
             push_back(i);
         }
     }
 
-    link_list(link_list &&other) noexcept {
+    link_list(link_list&& other) noexcept {
         tail_ = other.tail_;
         head_.reset(other.head_.release());
         length_ = other.length_;
     }
 
-    link_list &operator=(const link_list &other) {
+    link_list& operator=(const link_list& other) {
         tail_ = nullptr;
         length_ = 0;
         head_ = nullptr;//this delete the old data
-        for (const auto &i : other) {
+        for (const auto& i : other) {
             push_back(i);
         }
         return *this;
     }
 
-    link_list &operator=(link_list &&other) noexcept {
+    link_list& operator=(link_list&& other) noexcept {
         tail_ = other.tail_;
         head_ = other.head_.release();
         length_ = other.length_;
@@ -360,7 +360,7 @@ public:
 
     ~link_list() = default;
 
-    void push_back(const T &data) {
+    void push_back(const T& data) {
         if (head_ == nullptr) {
             head_ = make_unique<node_>(nullptr, nullptr, data);
             tail_ = head_.get();
@@ -384,7 +384,7 @@ public:
     }
 
     template<typename... Args>
-    T &emplace_back(Args ... args) {
+    T& emplace_back(Args ... args) {
         T temp(args...);
         if (head_ == nullptr) {
             head_ = make_unique<node_>(nullptr, nullptr, std::move(temp));
@@ -397,12 +397,12 @@ public:
         return back();
     }
 
-    T &back() const {
+    T& back() const {
         assert(tail_ != nullptr);
         return tail_->data_;
     }
 
-    void push_front(const T &data) {
+    void push_front(const T& data) {
         auto t = head_.release();
         head_ = make_unique<node_>(t, nullptr, std::move(data));
         if (tail_ == nullptr) {
@@ -418,7 +418,7 @@ public:
     }
 
     template<typename... Args>
-    T &emplace_front(Args... args) {
+    T& emplace_front(Args... args) {
         T temp(args...);
         auto t = head_.release();
         head_ = make_unique<node_>(t, nullptr, std::move(temp));
@@ -430,12 +430,12 @@ public:
 
     }
 
-    T &front() const {
+    T& front() const {
         assert(head_ != nullptr);
         return (*head_).data_;
     }
 
-    void insert(const T &data, base_iterator it) {
+    void insert(const T& data, base_iterator it) {
         if (index == begin()) {
             push_front(std::move(data));
         } else if (index == end()) {
@@ -449,7 +449,7 @@ public:
         }
     }
 
-    void insert(const T &data, const size_t index) {
+    void insert(const T& data, const size_t index) {
         if (index == 0) {
             push_front(std::move(data));
         } else if (index == length_) {
@@ -465,7 +465,7 @@ public:
     }
 
     template<typename... Args>
-    T &emplace(const size_t index, Args... args) {
+    T& emplace(const size_t index, Args... args) {
         T data(args...);
         if (index == 0) {
             push_front(std::move(data));
@@ -484,11 +484,11 @@ public:
         }
     }
 
-    T &operator[](const size_t index) {
+    T& operator[](const size_t index) {
         return static_cast<base_iterator>(atIndex(index)).ptr_->data_;
     }
 
-    T &at(const size_t index) {
+    T& at(const size_t index) {
         return static_cast<base_iterator>(atIndex(index)).ptr_->data_;
     }
 
