@@ -62,7 +62,6 @@ protected:
 
         base_forward_iterator(node_* ptr, bool end = false) : base_iterator(ptr, end) {}
 
-
         base_forward_iterator& operator++() {
             if (ptr_->next_ == nullptr) {
                 end_ = true;
@@ -125,7 +124,6 @@ protected:
             }
             return n;
         }
-
     };
 
     struct base_reverse_iterator : base_iterator {
@@ -199,7 +197,6 @@ protected:
             }
             return n;
         }
-
     };
 
 public:
@@ -307,7 +304,6 @@ public:
             return &(ptr_->data_);
         }
     };
-
 protected:
 
     iterator atIndex(const size_t index) {
@@ -427,7 +423,6 @@ public:
         }
         ++length_;
         return front();
-
     }
 
     T& front() const {
@@ -532,7 +527,6 @@ public:
         }
 
         length_ -= end - start;
-
     }
 
     void rsize(const size_t index) {
