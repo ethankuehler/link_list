@@ -225,35 +225,45 @@ TEST(link_list_test, erase){
 }
 
 TEST(link_list_test, insert){
-    link_list<int> f;
+    struct number {
+        int x;
+    };
+    link_list<number> f;
+
+    number a_number;
+
 
     //testing insert in empty list
-    f.insert(10,0);
-    ASSERT_EQ(10,f[0]);
+    a_number.x = 10;
+    f.insert(a_number,0);
+    ASSERT_EQ(10,f[0].x);
 
     //filling the list with numbers
     for (int i = 0; i < 10; ++i) {
-        f.push_back(i);
+        f.push_back({i});
     }
 
     //inserting in middle
-    f.insert(23,4);
-    ASSERT_EQ(23,f[4]);
-    ASSERT_EQ(2,f[3]); //checking to see if 2 is still in spot 3
-    ASSERT_EQ(3,f[5]);//checking to see if 3 has been shifted to 5
+    a_number.x = 23;
+    f.insert(a_number,4);
+    ASSERT_EQ(23,f[4].x);
+    ASSERT_EQ(2,f[3].x); //checking to see if 2 is still in spot 3
+    ASSERT_EQ(3,f[5].x);//checking to see if 3 has been shifted to 5
 
     //testing the size
     ASSERT_EQ(12,f.size());
 
     //testing insert at beginning;
-    f.insert(24,0);
-    ASSERT_EQ(24,f[0]);
-    ASSERT_EQ(24,f.front());
+    a_number.x = 24;
+    f.insert(a_number,0);
+    ASSERT_EQ(24,f[0].x);
+    ASSERT_EQ(24,f.front().x);
 
     //test inserting at the end
-    f.insert(35,13);
-    ASSERT_EQ(35,f[13]);
-    ASSERT_EQ(35, f.back());
+    a_number.x = 35;
+    f.insert(a_number,13);
+    ASSERT_EQ(35,f[13].x);
+    ASSERT_EQ(35, f.back().x);
 
     //testing the size again
     ASSERT_EQ(14,f.size());
@@ -330,4 +340,21 @@ TEST(link_list_test, reverse_iters){
     for (int i = 9; i > -1; --i) {
         ASSERT_EQ(f[9-i],g[i]);
     }
+}
+
+TEST(link_list_test, non_copy){
+    std::unique_ptr<int> foo;
+    link_list<std::unique_ptr<int> >f;
+
+    foo = make_unique<int>(10);
+    f.push_back(std::move(foo));
+    ASSERT_TRUE(*(f[0]) == 10);
+
+    foo = make_unique<int>(23);
+    f.insert(std::move(foo),0);
+    ASSERT_TRUE(*(f[0]) == 23);
+
+    foo = make_unique<int>(25);
+    f.push_front(std::move(foo));
+    ASSERT_TRUE(*(f[0]) == 25);
 }

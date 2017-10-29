@@ -8,7 +8,6 @@
 #include <memory>
 #include <cassert>
 
-#define protected public
 namespace expr {
 
 using std::make_unique;
@@ -23,8 +22,10 @@ protected:
         node_* back_;
         T data_;
 
-        node_(node_* next, node_* back, T data)
+        node_(node_* next, node_* back, const T& data)
                 : next_(next), back_(back), data_(data) {}
+        node_(node_* next, node_* back, T&& data)
+                : next_(next), back_(back), data_(std::move(data)) {}
     };
 
     struct base_iterator {
@@ -307,7 +308,6 @@ public:
 protected:
 
     iterator atIndex(const size_t index) {
-        assert(index < length_);
         auto it = begin();
         return it + index;
     }
@@ -361,7 +361,18 @@ public:
             head_ = make_unique<node_>(nullptr, nullptr, data);
             tail_ = head_.get();
         } else {
-            tail_->next_ = make_unique<node_>(nullptr, tail_, data);
+            tail_->next_ = make_unique<node_>(nullptr, tail_,data);
+            tail_ = tail_->next_.get();
+        }
+        ++length_;
+    }
+
+    void push_back(T&& data) noexcept {
+        if (head_ == nullptr) {
+            head_ = make_unique<node_>(nullptr, nullptr, std::move(data));
+            tail_ = head_.get();
+        } else {
+            tail_->next_ = make_unique<node_>(nullptr, tail_, std::move(data));
             tail_ = tail_->next_.get();
         }
         ++length_;
@@ -400,6 +411,15 @@ public:
 
     void push_front(const T& data) {
         auto t = head_.release();
+        head_ = make_unique<node_>(t, nullptr, data);
+        if (tail_ == nullptr) {
+            tail_ = head_.get();
+        }
+        ++length_;
+    }
+
+    void push_front(T&& data){
+        auto t = head_.release();
         head_ = make_unique<node_>(t, nullptr, std::move(data));
         if (tail_ == nullptr) {
             tail_ = head_.get();
@@ -431,59 +451,76 @@ public:
     }
 
     void insert(const T& data, base_iterator it) {
-        if (index == begin()) {
-            push_front(std::move(data));
-        } else if (index == end()) {
-            push_back(std::move(data));
+        if (it == begin()) {
+            push_front(data);
+        } else if (it == end()) {
+            push_back(data);
         } else {
             it.ptr_ = it.ptr_->back_;
-            auto temp = static_cast<base_iterator>(it).ptr_->next_.release();
-            static_cast<base_iterator>(it).ptr_->next_ =
-                    make_unique<node_>(temp, static_cast<base_iterator>(it).ptr_, std::move(data));
+            auto temp = it.ptr_->next_.release();
+            it.ptr_->next_ = make_unique<node_>(temp, it.ptr_, data);
             ++length_;
         }
     }
 
-    void insert(const T& data, const size_t index) {
-        if (index == 0) {
+    void insert(T&& data, base_iterator it){
+        if (it == begin()) {
             push_front(std::move(data));
-        } else if (index == length_) {
+        } else if (it == end()) {
             push_back(std::move(data));
         } else {
-            auto it = atIndex(index);
-            --it;
-            auto temp = static_cast<base_iterator>(it).ptr_->next_.release();
-            static_cast<base_iterator>(it).ptr_->next_ =
-                    make_unique<node_>(temp, static_cast<base_iterator>(it).ptr_, std::move(data));
+            it.ptr_ = it.ptr_->back_;
+            auto temp = it.ptr_->next_.release();
+            it.ptr_->next_ = make_unique<node_>(temp, it.ptr_, std::move(data));
             ++length_;
         }
+    }
+
+    void insert(T&& data, size_t index){
+        assert(index <= length_);
+        auto it = atIndex(index);
+        insert(std::move(data),it);
+    }
+
+    void insert(const T& data, const size_t index) {
+        assert(index <= length_);
+        auto it = atIndex(index);
+        insert(data,it);
     }
 
     template<typename... Args>
     T& emplace(const size_t index, Args... args) {
+        assert(index <= length_);
+        auto it = atIndex(index);
+        return emplace(it, args...);
+    }
+
+    template <typename... Args>
+    T& emplace(base_iterator it, Args... args){
         T data(args...);
-        if (index == 0) {
+        if (it == begin()) {
             push_front(std::move(data));
             return front();
-        } else if (index == length_) {
+        } else if (it == end()) {
             push_back(std::move(data));
             return back();
         } else {
-            auto it = atIndex(index);
-            --it;
-            auto temp = static_cast<base_iterator>(it).ptr_->next_.release();
-            static_cast<base_iterator>(it).ptr_->next_ =
-                    make_unique<node_>(temp, static_cast<base_iterator>(it).ptr_, std::move(data));
+            it.ptr_ = it.ptr_->back_;
+            auto temp = it.ptr_->next_.release();
+            it.ptr_->next_ =
+                    make_unique<node_>(temp, it.ptr_, std::move(data));
             ++length_;
-            return static_cast<base_iterator>(it).ptr_->next_.get()->data_;
+            return it.ptr_->next_.get()->data_;
         }
     }
 
     T& operator[](const size_t index) {
+        assert(index < length_);
         return static_cast<base_iterator>(atIndex(index)).ptr_->data_;
     }
 
     T& at(const size_t index) {
+        assert(index < length_);
         return static_cast<base_iterator>(atIndex(index)).ptr_->data_;
     }
 
@@ -503,9 +540,9 @@ public:
 
         if (start == 0) {
             auto h = atIndex(end);
-            static_cast<base_iterator>(h).ptr_->back_->next_.release();
-            static_cast<base_iterator>(h).ptr_->back_ = nullptr;
-            head_.reset(static_cast<base_iterator>(h).ptr_);
+            h.ptr_->back_->next_.release();
+            h.ptr_->back_ = nullptr;
+            head_.reset(h.ptr_);
         } else if (end == length_) {
             auto h = atIndex(start);
             --h;
@@ -530,7 +567,7 @@ public:
     }
 
     void rsize(const size_t index) {
-        assert(index < length_);
+        assert(index <= length_);
         auto it = atIndex(index);
         --it;
         tail_ = static_cast<base_iterator>(it).ptr_;
